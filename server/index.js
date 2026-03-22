@@ -1,11 +1,13 @@
 const express = require("express");
 const multer = require("multer");
-const pdfParse = require("pdf-parse"); 
+require("dotenv").config();
+
+const { extractText } = require("./utils/pdfParser");
 
 const app = express();
 
 const upload = multer({
-  storage: multer.memoryStorage()
+  storage: multer.memoryStorage(),
 });
 
 app.get("/", (req, res) => {
@@ -20,10 +22,11 @@ app.post("/upload", upload.single("resume"), async (req, res) => {
 
     console.log("File:", req.file.originalname);
 
-    const data = await pdfParse(req.file.buffer); 
-    console.log(data.text);
+    const text = await extractText(req.file.buffer);
 
-    res.send(data.text);
+    console.log(text);
+
+    res.send(text);
   } catch (error) {
     console.log("ERROR:", error);
     res.status(500).send("Error parsing PDF");
